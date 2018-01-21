@@ -17,14 +17,23 @@ const axios = require("axios");
 
 // async es7 syntax for getExchangeRate function
 const getExchanceRate = async (from, to) => {
-  const exchangeRates = await axios.get(
-    `https://api.fixer.io/latest?base=${from}`
-  );
-  if (!exchangeRates) {
+  try {
+    const exchangeRates = await axios.get(
+      `https://api.fixer.io/latest?base=${from}`
+    );
+    const rate = exchangeRates.data.rates[to];
+    if (rate) {
+      return rate;
+    } else {
+      throw new Error();
+      // which will then run the catch block below
+    }
+  } catch (error) {
     throw new Error("unable to fetch exchange rate");
   }
-
-  return exchangeRates.data.rates[to];
+  // if (!exchangeRates) {
+  //   throw new Error("unable to fetch exchange rate");
+  // }
 };
 
 // const getCountries = currencyCode => {
@@ -42,15 +51,19 @@ const getExchanceRate = async (from, to) => {
 
 // async es7 for getCountries function
 const getCountries = async currencyCode => {
-  const countries = await axios.get(
-    `https://restcountries.eu/rest/v2/currency/${currencyCode}`
-  );
-  if (!countries) {
-    throw new Error();
+  try {
+    const countries = await axios.get(
+      `https://restcountries.eu/rest/v2/currency/${currencyCode}`
+    );
+    return countries.data.map(country => {
+      return country.name;
+    });
+  } catch (error) {
+    throw new Error("unable to retrieve countries");
   }
-  return countries.data.map(country => {
-    return country.name;
-  });
+  // if (!countries) {
+  //   throw new Error();
+  // }
 };
 
 // const convertCurrency = (from, to, amount) => {
@@ -83,5 +96,5 @@ convertCurrency("USD", "JPY", 500)
     console.log(valueAfterExchange);
   })
   .catch(error => {
-    console.log(error);
+    console.log(error.message);
   });
